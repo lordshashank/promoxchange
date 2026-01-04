@@ -25,9 +25,9 @@ Analyze this coupon/discount code image and extract the following information in
   "title": "Brief title of the offer (e.g., '20% Off Electronics')",
   "brand": "Brand or company name",
   "code": "The coupon/promo code (if visible)",
-  "description": "Description of the offer/discount",
+  "description": "Description of the offer/discount. Use markdown for better formatting if applicable (e.g. bolding, lists).",
   "expiryDate": "Expiration date in ISO 8601 format (YYYY-MM-DD) if visible, otherwise null",
-  "terms": "Any terms and conditions mentioned",
+  "terms": "Any terms and conditions mentioned. Use markdown for better formatting (e.g. bullet points for multiple conditions).",
   "category": "Category of the coupon (e.g., 'Food', 'Electronics', 'Fashion', 'Travel', 'Entertainment', 'Other')",
   "currency": "The 3-letter currency code (e.g. USD, EUR, INR) if a specific currency is mentioned or implied by the region (e.g. £ -> GBP). If region-agnostic or universal, use 'Global'."
 }

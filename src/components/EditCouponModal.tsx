@@ -150,7 +150,7 @@ export function EditCouponModal({
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Description
+                            Description (Markdown supported)
                         </label>
                         <textarea
                             value={formData.description}
@@ -164,7 +164,7 @@ export function EditCouponModal({
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Terms & Conditions
+                            Terms & Conditions (Markdown supported)
                         </label>
                         <textarea
                             value={formData.terms}
