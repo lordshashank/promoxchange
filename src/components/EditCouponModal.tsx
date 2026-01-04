@@ -108,7 +108,7 @@ export function EditCouponModal({
                             </label>
                             <input
                                 type="number"
-                                step="0.01"
+                                step="0.00001"
                                 min="0"
                                 value={formData.priceUsd}
                                 onChange={(e) =>

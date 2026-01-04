@@ -231,7 +231,7 @@ export function ListCouponForm() {
               type="number"
               required
               min="0"
-              step="0.01"
+              step="0.00001"
               value={formData.price}
               onChange={(e) =>
                 setFormData({ ...formData, price: e.target.value })
