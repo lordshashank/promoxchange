@@ -49,7 +49,7 @@ export default function CouponDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const router = useRouter();
-  const { getAuthHeaders, login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
 
   const fetchCoupon = async () => {
     try {
@@ -83,10 +83,9 @@ export default function CouponDetailPage({
     setError(null);
 
     try {
-      const headers = getAuthHeaders();
       const res = await fetch(`/api/coupons/${id}`, {
         method: "DELETE",
-        headers: headers,
+        credentials: "include",
       });
 
       if (!res.ok) {

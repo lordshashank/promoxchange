@@ -19,7 +19,7 @@ interface ExtractedData {
 
 export function ListCouponForm() {
   const { address, isConnected } = useAccount();
-  const { isAuthenticated, login, getAuthHeaders } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,14 +73,12 @@ export function ListCouponForm() {
     setError(null);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...getAuthHeaders(),
-      };
-
       const res = await fetch("/api/coupons", {
         method: "POST",
-        headers: headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({
           sellerAddress: address,
           title: formData.title,

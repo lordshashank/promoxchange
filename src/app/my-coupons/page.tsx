@@ -22,7 +22,7 @@ import { useAuth } from "@/components/AuthProvider";
 
 export default function MyCouponsPage() {
   const { address, isConnected } = useAccount();
-  const { isAuthenticated, getAuthHeaders, isSigning, login } = useAuth();
+  const { isAuthenticated, isSigning, login } = useAuth();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -46,10 +46,9 @@ export default function MyCouponsPage() {
 
     async function fetchCoupons() {
       try {
-        const headers = getAuthHeaders();
         const res = await fetch(
           `/api/user/coupons?address=${address}&type=listed`,
-          { headers }
+          { credentials: "include" }
         );
 
         if (res.status === 401 || res.status === 403) {

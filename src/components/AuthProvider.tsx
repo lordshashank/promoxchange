@@ -5,145 +5,208 @@ import {
     useContext,
     useEffect,
     useState,
+    useCallback,
     ReactNode,
 } from "react";
-import { useAccount, useSignMessage, useDisconnect } from "wagmi";
+import { useAccount, useSignMessage, useDisconnect, useChainId } from "wagmi";
+import { createSiweMessage } from "viem/siwe";
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    token: string | null;
-    message: string | null;
+    address: string | null;
     login: () => Promise<void>;
-    logout: () => void;
-    getAuthHeaders: () => Record<string, string>;
+    logout: () => Promise<void>;
     isSigning: boolean;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
-    token: null,
-    message: null,
+    address: null,
     login: async () => { },
-    logout: () => { },
-    getAuthHeaders: () => ({}),
+    logout: async () => { },
     isSigning: false,
+    isLoading: true,
 });
 
 export function useAuth() {
     return useContext(AuthContext);
 }
 
-const STORAGE_KEY_PREFIX = "promoxchange_auth_";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
     const { address, isConnected } = useAccount();
+    const chainId = useChainId();
     const { signMessageAsync } = useSignMessage();
     const { disconnect } = useDisconnect();
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
+    const [authenticatedAddress, setAuthenticatedAddress] = useState<string | null>(null);
     const [isSigning, setIsSigning] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasCheckedSession, setHasCheckedSession] = useState(false);
 
-    // Load state from local storage on mount/address change
-    useEffect(() => {
-        if (!address) {
-            setIsAuthenticated(false);
-            setToken(null);
-            setMessage(null);
-            return;
-        }
+    // Check existing session on mount and address change
+    const checkSession = useCallback(async () => {
+        try {
+            const response = await fetch("/api/me", {
+                credentials: "include",
+            });
 
-        const saved = localStorage.getItem(STORAGE_KEY_PREFIX + address);
-        if (saved) {
-            try {
-                const { sig, msg, timestamp } = JSON.parse(saved);
-                // basic expiry check (7 days)
-                if (Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000) {
-                    setToken(sig);
-                    setMessage(msg);
-                    setIsAuthenticated(true);
-                } else {
-                    localStorage.removeItem(STORAGE_KEY_PREFIX + address);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.authenticated && data.address) {
+                    // Only set as authenticated if the server address matches the connected address
+                    if (address && data.address.toLowerCase() === address.toLowerCase()) {
+                        setIsAuthenticated(true);
+                        setAuthenticatedAddress(data.address);
+                        return true;
+                    }
                 }
-            } catch (e) {
-                console.error("Failed to parse auth", e);
             }
+        } catch (error) {
+            console.error("Session check failed:", error);
         }
+
+        setIsAuthenticated(false);
+        setAuthenticatedAddress(null);
+        return false;
     }, [address]);
+
+    useEffect(() => {
+        const init = async () => {
+            setIsLoading(true);
+            await checkSession();
+            setIsLoading(false);
+            setHasCheckedSession(true);
+        };
+        init();
+    }, [checkSession]);
+
+    // Handle wallet disconnection and address changes
+    useEffect(() => {
+        const handleAuthInvalidation = async () => {
+            const isDisconnected = !isConnected;
+            const addressChanged = address && authenticatedAddress &&
+                address.toLowerCase() !== authenticatedAddress.toLowerCase();
+
+            if (isAuthenticated && (isDisconnected || addressChanged)) {
+                try {
+                    await fetch("/api/siwe/logout", {
+                        method: "POST",
+                        credentials: "include",
+                    });
+                } catch (error) {
+                    console.error("Auto-logout failed:", error);
+                }
+                setIsAuthenticated(false);
+                setAuthenticatedAddress(null);
+            }
+        };
+
+        handleAuthInvalidation();
+    }, [isConnected, address, authenticatedAddress, isAuthenticated]);
 
     const login = async () => {
         if (!address) return;
 
         setIsSigning(true);
         try {
-            const timestamp = Date.now();
-            const msg = `Welcome to PromoXchange!
+            // 1. Get nonce from server
+            const nonceResponse = await fetch("/api/siwe/nonce", {
+                method: "POST",
+                credentials: "include",
+            });
 
-To verify that you own this wallet, please sign this message.
-This signature creates a session without costing any gas.
+            if (!nonceResponse.ok) {
+                throw new Error("Failed to get nonce");
+            }
 
-Website: ${window.location.origin}
-Wallet: ${address}
-Timestamp: ${timestamp}`;
+            const { nonce } = await nonceResponse.json();
 
-            const sig = await signMessageAsync({ message: msg });
+            // 2. Create SIWE message
+            const message = createSiweMessage({
+                address,
+                chainId,
+                domain: window.location.host,
+                nonce,
+                uri: window.location.origin,
+                version: "1",
+                statement: "Sign in to PromoXchange. This signature creates a session without costing any gas.",
+            });
 
-            const authData = { sig, msg, timestamp };
-            localStorage.setItem(STORAGE_KEY_PREFIX + address, JSON.stringify(authData));
+            // 3. Sign the message
+            const signature = await signMessageAsync({ message });
 
-            setToken(sig);
-            setMessage(msg);
-            setIsAuthenticated(true);
+            // 4. Verify signature with server
+            const verifyResponse = await fetch("/api/siwe/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ message, signature }),
+                credentials: "include",
+            });
+
+            if (!verifyResponse.ok) {
+                const error = await verifyResponse.json();
+                throw new Error(error.error || "Verification failed");
+            }
+
+            const result = await verifyResponse.json();
+
+            if (result.success) {
+                setIsAuthenticated(true);
+                setAuthenticatedAddress(result.address);
+            }
         } catch (error) {
-            console.error("Signing failed", error);
-            // Optional: disconnect if they refuse to sign?
-            // disconnect(); 
+            console.error("SIWE login failed:", error);
         } finally {
             setIsSigning(false);
         }
     };
-
-    const logout = () => {
-        if (address) {
-            localStorage.removeItem(STORAGE_KEY_PREFIX + address);
+    // not used as of now anywhere as we handle it in useeffect
+    const logout = async () => {
+        try {
+            await fetch("/api/siwe/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch (error) {
+            console.error("Logout API call failed:", error);
         }
-        setToken(null);
-        setMessage(null);
+
         setIsAuthenticated(false);
+        setAuthenticatedAddress(null);
         disconnect();
     };
 
     // Auto-prompt login if connected but not authenticated
     useEffect(() => {
-        if (isConnected && address && !isAuthenticated && !isSigning && !token) {
-            // one second timeout
-            setTimeout(() => {
+        if (
+            isConnected &&
+            address &&
+            !isAuthenticated &&
+            !isSigning &&
+            !isLoading &&
+            hasCheckedSession
+        ) {
+            // Small delay to allow UI to settle
+            const timeout = setTimeout(() => {
                 login();
-            }, 1000);
+            }, 500);
+            return () => clearTimeout(timeout);
         }
-    }, [isConnected, address, isAuthenticated, token]);
-
-    const getAuthHeaders = (): Record<string, string> => {
-        if (!token || !message || !address) return {};
-        // Headers cannot contain newlines, so we encode the message
-        return {
-            "x-auth-sig": token,
-            "x-auth-msg": encodeURIComponent(message),
-            "x-auth-address": address,
-        };
-    };
+    }, [isConnected, address, isAuthenticated, isLoading, hasCheckedSession]);
 
     return (
         <AuthContext.Provider
             value={{
                 isAuthenticated,
-                token,
-                message,
+                address: authenticatedAddress,
                 login,
                 logout,
-                getAuthHeaders,
                 isSigning,
+                isLoading,
             }}
         >
             {children}

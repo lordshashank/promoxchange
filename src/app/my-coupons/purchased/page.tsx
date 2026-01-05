@@ -22,7 +22,7 @@ import { useAuth } from "@/components/AuthProvider";
 
 export default function PurchasedCouponsPage() {
   const { address, isConnected } = useAccount();
-  const { isAuthenticated, getAuthHeaders, isSigning, login } = useAuth();
+  const { isAuthenticated, isSigning, login } = useAuth();
   const [coupons, setCoupons] = useState<PurchasedCoupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -39,11 +39,10 @@ export default function PurchasedCouponsPage() {
 
     async function fetchCoupons() {
       try {
-        const headers = getAuthHeaders();
         const res = await fetch(
           `/api/user/coupons?address=${address}&type=purchased`,
           {
-            headers: headers
+            credentials: "include",
           }
         );
 

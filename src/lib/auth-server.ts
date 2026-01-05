@@ -1,6 +1,7 @@
 
 import { NextRequest } from "next/server";
-import { verifyMessage } from "viem";
+import { cookies } from "next/headers";
+import { verifyJWT, type JWTPayloadData } from "./siwe";
 
 export interface AuthResult {
     isAuthenticated: boolean;
@@ -8,58 +9,42 @@ export interface AuthResult {
     error?: string;
 }
 
+const AUTH_COOKIE_NAME = "auth_token";
+
 export async function verifyAuth(request: NextRequest): Promise<AuthResult> {
     try {
-        const signature = request.headers.get("x-auth-sig");
-        const encodedMessage = request.headers.get("x-auth-msg");
-        const address = request.headers.get("x-auth-address");
+        // Get auth token from cookies
+        const cookieStore = await cookies();
+        const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
 
-        if (!signature || !encodedMessage || !address) {
+        if (!token) {
             return {
                 isAuthenticated: false,
-                error: "Missing auth headers",
+                error: "No authentication token",
             };
         }
 
-        const message = decodeURIComponent(encodedMessage);
+        // Verify JWT
+        const payload = await verifyJWT(token);
 
-        // Optional: Check timestamp in message to prevent simple replay attacks
-        // Ideally the message should be: "Login to PromoXchange\nTimestamp: <timestamp>"
-        const timestampMatch = message.match(/Timestamp:\s*(\d+)/);
-        if (!timestampMatch) {
+        if (!payload) {
             return {
                 isAuthenticated: false,
-                error: "Invalid message format",
+                error: "Invalid or expired token",
             };
         }
 
-        const timestamp = parseInt(timestampMatch[1]);
-        const now = Date.now();
-        // Allow signatures up to 24 hours old (or whatever session duration we want)
-        // For now, let's say 7 days implies a "session"
-        if (now - timestamp > 7 * 24 * 60 * 60 * 1000) {
+        // Check expiration
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
             return {
                 isAuthenticated: false,
                 error: "Session expired",
             };
         }
 
-        const valid = await verifyMessage({
-            address: address as `0x${string}`,
-            message: message,
-            signature: signature as `0x${string}`,
-        });
-
-        if (!valid) {
-            return {
-                isAuthenticated: false,
-                error: "Invalid signature",
-            };
-        }
-
         return {
             isAuthenticated: true,
-            address: address.toLowerCase(),
+            address: payload.sub?.toLowerCase(),
         };
     } catch (err) {
         console.error("Auth verification error:", err);

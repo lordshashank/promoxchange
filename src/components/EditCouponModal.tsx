@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
 import { CATEGORIES } from "@/lib/constants";
 
 interface EditCouponModalProps {
@@ -17,7 +16,6 @@ export function EditCouponModal({
     onClose,
     onSuccess,
 }: EditCouponModalProps) {
-    const { getAuthHeaders } = useAuth();
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,14 +36,12 @@ export function EditCouponModal({
         setError(null);
 
         try {
-            const headers = {
-                "Content-Type": "application/json",
-                ...getAuthHeaders(),
-            };
-
             const res = await fetch(`/api/coupons/${coupon.id}`, {
                 method: "PUT",
-                headers: headers,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
                 body: JSON.stringify({
                     title: formData.title,
                     price_usd: parseFloat(formData.priceUsd),
