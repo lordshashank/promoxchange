@@ -28,7 +28,7 @@ Analyze this coupon/discount code image and extract the following information in
   "description": "Description of the offer/discount. Use markdown for better formatting if applicable (e.g. bolding, lists).",
   "expiryDate": "Expiration date in ISO 8601 format (YYYY-MM-DD) if visible, otherwise null",
   "terms": "Any terms and conditions mentioned. Use markdown for better formatting (e.g. bullet points for multiple conditions).",
-  "category": "Category of the coupon (e.g., 'Food', 'Electronics', 'Fashion', 'Travel', 'Entertainment', 'Other')",
+  "category": "Category of the coupon. Use exactly one of: 'Food & Dining', 'Electronics', 'Fashion', 'Travel', 'Entertainment', 'Health & Beauty', 'Home & Garden', 'Services', 'Other'",
   "currency": "The 3-letter currency code (e.g. USD, EUR, INR) if a specific currency is mentioned or implied by the region (e.g. £ -> GBP). If region-agnostic or universal, use 'Global'."
 }
 
@@ -74,5 +74,29 @@ Return ONLY the JSON object, no additional text or markdown formatting.
     throw new Error("Failed to extract JSON from Gemini response");
   }
 
-  return JSON.parse(jsonMatch[0]);
+  const data = JSON.parse(jsonMatch[0]) as ExtractedCouponInfo;
+
+  // Validation & Normalization
+  const validCategories = [
+    "Food & Dining",
+    "Electronics",
+    "Fashion",
+    "Travel",
+    "Entertainment",
+    "Health & Beauty",
+    "Home & Garden",
+    "Services",
+    "Other",
+  ];
+
+  if (data.category) {
+    // Validation: Ensure it's one of the allowed categories
+    if (!validCategories.includes(data.category)) {
+      data.category = "Other";
+    }
+  } else {
+    data.category = "Other";
+  }
+
+  return data;
 }

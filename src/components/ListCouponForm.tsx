@@ -29,7 +29,7 @@ export function ListCouponForm() {
     brand: "",
     code: "",
     description: "",
-    category: "Other",
+    category: "Other", // Initial value for category
     currency: "Global",
     price: "",
     expiryDate: "",
