@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { EditCouponModal } from "@/components/EditCouponModal";
+import { ConfirmationModal } from "@/components/ConfirmationModal";
 
 interface Coupon {
   id: string;
@@ -49,6 +50,8 @@ export default function CouponDetailPage({
   const [purchasedCode, setPurchasedCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showConfirmBuy, setShowConfirmBuy] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const router = useRouter();
   const { login, isAuthenticated } = useAuth();
 
@@ -71,15 +74,15 @@ export default function CouponDetailPage({
   }, [id]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this coupon? This action cannot be undone.")) {
-      return;
-    }
-
     if (!isAuthenticated) {
       await login();
       return;
     }
 
+    setShowConfirmDelete(true);
+  };
+
+  const executeDelete = async () => {
     setDeleting(true);
     setError(null);
 
@@ -112,6 +115,15 @@ export default function CouponDetailPage({
       return;
     }
 
+    if (coupon?.status !== "verified") {
+      setShowConfirmBuy(true);
+      return;
+    }
+
+    await executePurchase();
+  };
+
+  const executePurchase = async () => {
     setPurchasing(true);
     setError(null);
 
@@ -483,6 +495,30 @@ export default function CouponDetailPage({
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onSuccess={fetchCoupon}
+        />
+      )}
+      {coupon && (
+        <ConfirmationModal
+          isOpen={showConfirmBuy}
+          onClose={() => setShowConfirmBuy(false)}
+          onConfirm={executePurchase}
+          title={coupon.status === "invalid" ? "Invalid Coupon Warning" : "Unverified Coupon Warning"}
+          message={`This coupon is currently marked as ${coupon.status || 'unverified'}. Buying it may be risky as the code might not work. Do you still want to proceed?`}
+          confirmText="Yes, Proceed anyway"
+          cancelText="No, Cancel"
+          variant={coupon.status === "invalid" ? "danger" : "warning"}
+        />
+      )}
+      {coupon && (
+        <ConfirmationModal
+          isOpen={showConfirmDelete}
+          onClose={() => setShowConfirmDelete(false)}
+          onConfirm={executeDelete}
+          title="Delete Coupon"
+          message="Are you sure you want to delete this coupon? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Keep it"
+          variant="danger"
         />
       )}
       <div className="mt-auto">

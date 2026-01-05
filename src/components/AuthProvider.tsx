@@ -206,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Small delay to allow UI to settle
             const timeout = setTimeout(() => {
                 login();
-            }, 1000);
+            }, 500);
             return () => clearTimeout(timeout);
         }
     }, [isConnected, address, isAuthenticated, isLoading, hasCheckedSession, connector?.id]);

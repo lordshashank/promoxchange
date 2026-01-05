@@ -19,7 +19,8 @@ export function Header() {
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
+          {/* Logo Section */}
+          <div className="flex-1 flex items-center gap-3">
             {/* Mobile Menu Button - Left End */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -40,31 +41,32 @@ export function Header() {
               <img src="/promoxchange.png" alt="PromoXchange Logo" className="w-8 h-8 rounded-full" />
               <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">PromoXchange</span>
             </Link>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8 ml-4">
-              <Link
-                href="/"
-                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-              >
-                Browse
-              </Link>
-              <Link
-                href="/list"
-                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-              >
-                Sell Coupon
-              </Link>
-              <Link
-                href="/my-coupons"
-                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-              >
-                My Coupons
-              </Link>
-            </nav>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden md:flex items-center gap-8 px-4">
+            <Link
+              href="/"
+              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap"
+            >
+              Browse
+            </Link>
+            <Link
+              href="/list"
+              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap"
+            >
+              Sell Coupon
+            </Link>
+            <Link
+              href="/my-coupons"
+              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors whitespace-nowrap"
+            >
+              My Coupons
+            </Link>
+          </nav>
+
+          {/* Right Section */}
+          <div className="flex-1 flex items-center justify-end gap-2 sm:gap-4">
             {/* Theme Toggle - Desktop Only */}
             {mounted && (
               <button
