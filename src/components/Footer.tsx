@@ -32,7 +32,7 @@ export function Footer() {
                             </svg>
                         </a>
                         <a
-                            href="https://twitter.com/promoxchange"
+                            href="https://x.com/0xlord_forever/status/2008225879558963513?s=20"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="group transition-all duration-300"
