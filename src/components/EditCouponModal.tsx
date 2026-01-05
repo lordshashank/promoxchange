@@ -92,6 +92,7 @@ export function EditCouponModal({
                             onChange={(e) =>
                                 setFormData({ ...formData, title: e.target.value })
                             }
+                            placeholder="e.g., Amazon: 20% Off Electronics"
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
                             required
                         />

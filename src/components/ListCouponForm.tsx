@@ -182,7 +182,7 @@ export function ListCouponForm() {
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
-            placeholder="e.g., 20% Off Electronics"
+            placeholder="e.g., Amazon: 20% Off Electronics"
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white bg-white dark:bg-gray-800 placeholder:text-gray-400 dark:placeholder:text-gray-500"
           />
         </div>

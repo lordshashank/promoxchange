@@ -22,7 +22,7 @@ export async function extractCouponInfo(
   const prompt = `
 Analyze this coupon/discount code image and extract the following information in JSON format:
 {
-  "title": "Brief title of the offer (e.g., '20% Off Electronics')",
+  "title": "A comprehensive title that includes the Brand/Company name, the Product/Service (if applicable), and the Discount/Offer (e.g., 'Amazon: 20% Off Electronics' or 'Starbucks: Buy 1 Get 1 Free on Caffé Latte')",
   "brand": "Brand or company name",
   "code": "The coupon/promo code (if visible)",
   "description": "Description of the offer/discount. Use markdown for better formatting if applicable (e.g. bolding, lists).",
