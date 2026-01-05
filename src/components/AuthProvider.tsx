@@ -34,7 +34,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const { address, isConnected } = useAccount();
+    const { address, isConnected, status } = useAccount();
     const chainId = useChainId();
     const { signMessageAsync } = useSignMessage();
     const { disconnect } = useDisconnect();
@@ -67,12 +67,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error("Session check failed:", error);
         }
 
-        setIsAuthenticated(false);
-        setAuthenticatedAddress(null);
+        // Only clear authentication state if the wallet is settled and definitely doesn't match
+        if (status !== "connecting" && status !== "reconnecting") {
+            setIsAuthenticated(false);
+            setAuthenticatedAddress(null);
+        }
         return false;
-    }, [address]);
+    }, [address, status]);
 
     useEffect(() => {
+        // Wait for connection to settle before doing the initial session check
+        if (status === "connecting" || status === "reconnecting") return;
+
         const init = async () => {
             setIsLoading(true);
             await checkSession();
@@ -80,12 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setHasCheckedSession(true);
         };
         init();
-    }, [checkSession]);
+    }, [checkSession, status]);
 
     // Handle wallet disconnection and address changes
     useEffect(() => {
         const handleAuthInvalidation = async () => {
-            const isDisconnected = !isConnected;
+            // Wait for reconnection to settle before deciding to log out
+            if (status === "connecting" || status === "reconnecting") return;
+
+            const isDisconnected = status === "disconnected";
             const addressChanged = address && authenticatedAddress &&
                 address.toLowerCase() !== authenticatedAddress.toLowerCase();
 
@@ -104,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         handleAuthInvalidation();
-    }, [isConnected, address, authenticatedAddress, isAuthenticated]);
+    }, [status, address, authenticatedAddress, isAuthenticated]);
 
     const login = async () => {
         if (!address) return;
@@ -193,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Small delay to allow UI to settle
             const timeout = setTimeout(() => {
                 login();
-            }, 500);
+            }, 1000);
             return () => clearTimeout(timeout);
         }
     }, [isConnected, address, isAuthenticated, isLoading, hasCheckedSession]);

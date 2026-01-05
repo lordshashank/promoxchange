@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { ExactEvmScheme } from "@x402/evm";
 import { networkId } from "@/lib/chain";
@@ -168,8 +169,25 @@ export default function CouponDetailPage({
 
       const data = await res.json();
       setPurchasedCode(data.coupon.code);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Purchase failed");
+    } catch (err: any) {
+      console.error("Purchase error detail:", err);
+      let errorMessage = "Failed to buy";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+
+        // Custom handling for common EVM/Wallet errors
+        const msg = errorMessage.toLowerCase();
+        if (msg.includes("user rejected") || msg.includes("user denied")) {
+          errorMessage = "Transaction was cancelled in your wallet.";
+        } else if (msg.includes("insufficient funds") || msg.includes("exceeds the balance") || msg.includes("insufficient balance") || msg.includes("purchase failed")) {
+          errorMessage = "Purchase failed. Please ensure you have enough USDC and native tokens for gas.";
+        } else if (msg.includes("connector not found")) {
+          errorMessage = "Wallet connector not found. Please refresh or reconnect.";
+        }
+      }
+
+      setError(errorMessage);
     } finally {
       setPurchasing(false);
     }
@@ -177,7 +195,7 @@ export default function CouponDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
@@ -186,13 +204,16 @@ export default function CouponDetailPage({
             <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/4" />
           </div>
         </main>
+        <div className="mt-auto">
+          <Footer />
+        </div>
       </div>
     );
   }
 
   if (!coupon) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Coupon Not Found</h1>
@@ -206,6 +227,9 @@ export default function CouponDetailPage({
             Browse Coupons
           </a>
         </main>
+        <div className="mt-auto">
+          <Footer />
+        </div>
       </div>
     );
   }
@@ -233,7 +257,7 @@ export default function CouponDetailPage({
   const gradientClass = categoryColors[coupon.category] || categoryColors.Other;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -431,7 +455,17 @@ export default function CouponDetailPage({
                           : `Buy for $${coupon.price_usd} USDC`}
                   </button>
                   {error && (
-                    <p className="text-red-500 text-center mt-4">{error}</p>
+                    <div className="mt-4 text-center">
+                      <p className="text-red-500">{error}</p>
+                      <a
+                        href="https://t.me/promoxchange"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block"
+                      >
+                        Need help?
+                      </a>
+                    </div>
                   )}
                   <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-4">
                     Payment is made directly to the seller via x402 protocol
@@ -451,6 +485,9 @@ export default function CouponDetailPage({
           onSuccess={fetchCoupon}
         />
       )}
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 }

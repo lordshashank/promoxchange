@@ -19,39 +19,57 @@ export function Header() {
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-3 z-50">
-            <img src="/promoxchange.png" alt="PromoXchange Logo" className="w-8 h-8 rounded-full" />
-            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">PromoXchange</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Mobile Menu Button - Left End */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 z-50 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              {isMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="/"
-              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              Browse
+            <Link href="/" className="flex items-center gap-3 z-50">
+              <img src="/promoxchange.png" alt="PromoXchange Logo" className="w-8 h-8 rounded-full" />
+              <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">PromoXchange</span>
             </Link>
-            <Link
-              href="/list"
-              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              Sell Coupon
-            </Link>
-            <Link
-              href="/my-coupons"
-              className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              My Coupons
-            </Link>
-          </nav>
 
-          <div className="hidden md:flex items-center gap-4">
-            {/* Theme Toggle */}
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8 ml-4">
+              <Link
+                href="/"
+                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              >
+                Browse
+              </Link>
+              <Link
+                href="/list"
+                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              >
+                Sell Coupon
+              </Link>
+              <Link
+                href="/my-coupons"
+                className="text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              >
+                My Coupons
+              </Link>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            {/* Theme Toggle - Desktop Only */}
             {mounted && (
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="hidden md:flex p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle theme"
               >
                 {theme === "dark" ? (
@@ -65,24 +83,17 @@ export function Header() {
                 )}
               </button>
             )}
-            <ConnectButton showBalance={false} accountStatus="address" label="Login" />
-          </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 z-50 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            {isMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
+            {/* Mobile: Avatar only to save space */}
+            <div className="md:hidden">
+              <ConnectButton showBalance={false} accountStatus="avatar" label="Login" />
+            </div>
+
+            {/* Desktop: Full address */}
+            <div className="hidden md:block">
+              <ConnectButton showBalance={false} accountStatus="address" label="Login" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -112,8 +123,7 @@ export function Header() {
               My Coupons
             </Link>
 
-            <div className="border-t border-gray-100 dark:border-gray-800 mt-2 pt-4 px-4 pb-2 flex items-center justify-between">
-              <ConnectButton />
+            <div className={`border-t border-gray-100 dark:border-gray-800 mt-2 pt-4 px-4 pb-2 flex items-center ${mounted ? 'justify-between' : 'justify-end'}`}>
               {/* Mobile Theme Toggle */}
               {mounted && (
                 <button

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import Link from "next/link";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 interface Coupon {
   id: string;
@@ -69,7 +70,7 @@ export default function MyCouponsPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Connect Your Wallet</h1>
@@ -77,13 +78,16 @@ export default function MyCouponsPage() {
             Please connect your wallet to view your coupons.
           </p>
         </main>
+        <div className="mt-auto">
+          <Footer />
+        </div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Verify Ownership</h1>
@@ -98,15 +102,18 @@ export default function MyCouponsPage() {
             {isSigning ? "Check Wallet..." : "Sign Message"}
           </button>
         </main>
+        <div className="mt-auto">
+          <Footer />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-black transition-colors">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Coupons</h1>
           <div className="flex gap-4 mt-4">
@@ -201,6 +208,9 @@ export default function MyCouponsPage() {
           </div>
         )}
       </main>
+      <div className="mt-auto">
+        <Footer />
+      </div>
     </div>
   );
 }
