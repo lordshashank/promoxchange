@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="./public/promoxchange.png" width="120" alt="PromoXchange Logo" />
+  <h1>PromoXchange</h1>
+</div>
 
-## Getting Started
+**PromoXchange** is a next-generation decentralized marketplace for trading digital coupons and gift cards. Built on the principles of transparency and security, it empowers users to buy and sell promotional codes directly, powered by the **x402 protocol** and **AI-driven verification**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🌐 Live Application
+Experience the marketplace at: **[promoxchange.xyz](https://promoxchange.xyz)**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ✨ Core Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### 🛡️ AI-Powered Verification
+We leverage **Google Gemini Vision AI** to automatically extract and verify coupon details from screenshots. This ensures that every listing is accurate, categorized correctly, and validated against the provided terms.
 
-## Learn More
+#### 💸 Seamless x402 Payments
+Buying coupons is completely trustless. Transactions are handled via the **x402 protocol**, allowing for direct **USDC** payments between buyers and sellers. No middleman, no extra fees—just pure peer-to-peer commerce.
 
-To learn more about Next.js, take a look at the following resources:
+#### 🔐 Web3 Native Identity
+Sign in securely with your wallet using **Sign-In with Ethereum (SIWE)**. We support major wallets including **RainbowKit**, **Porto**, and other EVM-compatible providers for a smooth onboarding experience.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### 🎫 Ticket-Style Interface
+Coupons are displayed in a unique, interactive "ticket" format, making it easy to see brand logos, expiry dates, and categories at a glance.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### 🛠️ Built With
+*   **Framework**: [Next.js](https://nextjs.org/) (App Router)
+*   **Payments**: [x402 Protocol](https://x402.org)
+*   **Blockchain**: [Wagmi](https://wagmi.sh/) & [Viem](https://viem.sh/)
+*   **AI**: [Google Gemini Pro Vision](https://ai.google.dev/gemini-api)
+*   **Database**: [Supabase](https://supabase.com/)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 🚀 Future Roadmap
+*   Support for multiple stablecoins.
+*   Enhanced verification mechanisms.
+*   Mobile-first Progressive Web App (PWA).
+
+---
+© 2026 PromoXchange | Decentralizing the coupon economy.
