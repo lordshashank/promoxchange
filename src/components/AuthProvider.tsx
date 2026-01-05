@@ -34,7 +34,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const { address, isConnected, status } = useAccount();
+    const { address, isConnected, status, connector } = useAccount();
     const chainId = useChainId();
     const { signMessageAsync } = useSignMessage();
     const { disconnect } = useDisconnect();
@@ -191,13 +191,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Auto-prompt login if connected but not authenticated
     useEffect(() => {
+        // Skip auto-login for Porto connector as it has issues with auto-popups getting stuck
+        const isPorto = connector?.id === "porto" || connector?.id === "xyz.ithaca.porto";
+
         if (
             isConnected &&
             address &&
             !isAuthenticated &&
             !isSigning &&
             !isLoading &&
-            hasCheckedSession
+            hasCheckedSession &&
+            !isPorto
         ) {
             // Small delay to allow UI to settle
             const timeout = setTimeout(() => {
@@ -205,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }, 1000);
             return () => clearTimeout(timeout);
         }
-    }, [isConnected, address, isAuthenticated, isLoading, hasCheckedSession]);
+    }, [isConnected, address, isAuthenticated, isLoading, hasCheckedSession, connector?.id]);
 
     return (
         <AuthContext.Provider
